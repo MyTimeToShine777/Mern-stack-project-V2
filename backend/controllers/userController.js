@@ -1,8 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
 import { BadRequestError } from "../errors/errors.js";
+import { UnauthenicatedError } from "../errors/errors.js";
 
 //Desc Register New User
 //Route /api/users (POST)
@@ -16,27 +15,22 @@ const registerUser = async(req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-        throw new BadRequestError("User Already Exists");
+        throw new UnauthenicatedError("User Already Exists");
     }
-
-    //Hash Password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
 
     //Create User
     const user = await User.create({
         name,
         email,
-        password: hashedPassword,
+        password,
     });
-    const payload = {
-        id: user._id,
-        name: user.name,
-    };
+
+    //Generate Token
+    const Token = user.generateToken();
 
     if (user) {
         res.status(StatusCodes.CREATED).json({
-            token: generateToken(payload),
+            token: Token,
         });
     } else {
         throw new BadRequestError("Invalid User Data");
@@ -48,19 +42,27 @@ const registerUser = async(req, res) => {
 //Access Public
 const loginUser = async(req, res) => {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+        throw new BadRequestError("Please Provide Email and Password");
+    }
     //Check for User Email
     const user = await User.findOne({ email });
-    const payload = {
-        id: user._id,
-        name: user.name,
-    };
 
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (!user) {
+        throw new UnauthenicatedError("Invalid Credentials");
+    }
+    const isPasswordCorrect = await user.comparePassword(password);
+
+    if (user && isPasswordCorrect) {
+        //Generate Token
+        const Token = user.generateToken();
+
         res.status(StatusCodes.OK).json({
-            token: generateToken(payload),
+            token: Token,
         });
     } else {
-        throw new BadRequestError("Invalid Credentials");
+        throw new UnauthenicatedError("Invalid Credentials");
     }
 };
 //Desc   GET User data
@@ -73,16 +75,6 @@ const getMe = async(req, res) => {
         name,
         email,
     });
-};
-
-//Generate JWT
-
-const generateToken = (payload) => {
-    return jwt.sign({ id: payload.id, name: payload.name },
-        process.env.JWT_SECRET, {
-            expiresIn: "30d",
-        }
-    );
 };
 
 export { registerUser, loginUser, getMe };

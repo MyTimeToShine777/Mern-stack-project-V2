@@ -9,15 +9,31 @@ import connectDB from "./db/connect.js";
 dotenv.config();
 import goalRoutes from "./routes/goalRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import protectRoute from "./middleware/authMiddleware.js";
 import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
-import errorHandlerMiddleware from "./middleware/errorHandler.js";
-import protectRoute from "../middleware/authMiddleware.js";
+import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware.js";
+
+//Extra Security packages
+import helmet from "helmet";
+import cors from "cors";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
 
 const __dirname = path.dirname(fileURLToPath(
     import.meta.url));
 
 //Middleware
+app.set("trust proxy", 1);
+app.use(
+    rateLimit({
+        windowMs: 15 * 60 * 1000, //15 minutes
+        max: 100, //limit each IP to 100 requests per windowMs
+    })
+);
 app.use(express.json());
+app.use(helmet());
+app.use(cors());
+app.use(xss());
 app.use(express.urlencoded({ extended: false }));
 //Routes
 
