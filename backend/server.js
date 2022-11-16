@@ -5,8 +5,8 @@ import colors from "colors";
 import express from "express";
 const app = express();
 import dotenv from "dotenv";
-import connectDB from "./db/connect.js";
 dotenv.config();
+import connectDB from "./db/connect.js";
 import goalRoutes from "./routes/goalRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import protectRoute from "./middleware/authMiddleware.js";
@@ -18,9 +18,6 @@ import helmet from "helmet";
 import cors from "cors";
 import xss from "xss-clean";
 import rateLimit from "express-rate-limit";
-
-const __dirname = path.dirname(fileURLToPath(
-    import.meta.url));
 
 //Middleware
 app.set("trust proxy", 1);
@@ -35,12 +32,15 @@ app.use(helmet());
 app.use(cors());
 app.use(xss());
 app.use(express.urlencoded({ extended: false }));
-//Routes
 
+//Routes
 app.use("/api/users", userRoutes);
 app.use("/api/v1/goals", protectRoute, goalRoutes);
 
 //Serve Frontend
+const __dirname = path.dirname(fileURLToPath(
+    import.meta.url));
+
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../frontend/build")));
 
@@ -56,6 +56,7 @@ if (process.env.NODE_ENV === "production") {
 //ErrorMiddleware
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
+
 //Server
 const PORT = process.env.PORT || 5000;
 const start = async() => {

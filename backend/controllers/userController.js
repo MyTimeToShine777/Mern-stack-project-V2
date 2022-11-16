@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import User from "../models/userModel.js";
 import { BadRequestError } from "../errors/errors.js";
-import { UnauthenicatedError } from "../errors/errors.js";
+import { UnauthenticatedError } from "../errors/errors.js";
 
 //Desc Register New User
 //Route /api/users (POST)
@@ -15,7 +15,7 @@ const registerUser = async(req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-        throw new UnauthenicatedError("User Already Exists");
+        throw new UnauthenticatedError("User Already Exists");
     }
 
     //Create User
@@ -50,7 +50,7 @@ const loginUser = async(req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw new UnauthenicatedError("Invalid Credentials");
+        throw new UnauthenticatedError("Invalid Credentials");
     }
     const isPasswordCorrect = await user.comparePassword(password);
 
@@ -62,7 +62,7 @@ const loginUser = async(req, res) => {
             token: Token,
         });
     } else {
-        throw new UnauthenicatedError("Invalid Credentials");
+        throw new UnauthenticatedError("Invalid Credentials");
     }
 };
 //Desc   GET User data

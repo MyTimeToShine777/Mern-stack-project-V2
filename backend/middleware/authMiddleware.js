@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
-import { UnauthenicatedError } from "../errors/errors.js";
+import { UnauthenticatedError } from "../errors/errors.js";
 
 const protectRoute = async(req, res, next) => {
     let token;
@@ -20,11 +20,11 @@ const protectRoute = async(req, res, next) => {
             next();
         } catch (error) {
             console.log(error);
-            throw new UnauthenicatedError("Not Authorized");
+            throw new UnauthenticatedError("Not Authorized");
         }
     }
     if (!token) {
-        throw new UnauthenicatedError("Not Authorized, No Token");
+        throw new UnauthenticatedError("Not Authorized, No Token");
     }
 };
 

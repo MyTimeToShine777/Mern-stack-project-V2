@@ -3,7 +3,7 @@ import Goal from "../models/goalModel.js";
 import User from "../models/userModel.js";
 import { BadRequestError } from "../errors/errors.js";
 import { NotFoundError } from "../errors/errors.js";
-import { UnauthenicatedError } from "../errors/errors.js";
+import { UnauthenticatedError } from "../errors/errors.js";
 
 //Desc Get All Goals
 //Route /api/v1/goals (GET)
@@ -49,11 +49,11 @@ const updateGoals = async(req, res) => {
 
     //Check for login user
     if (!req.user) {
-        throw new UnauthenicatedError("User Not Found");
+        throw new UnauthenticatedError("User Not Found");
     }
     //Make Sure the Logged in user Matches the Goal User
     if (goal.user.toString() !== req.user.id) {
-        throw new UnauthenicatedError("User Not Authorized");
+        throw new UnauthenticatedError("User Not Authorized");
     }
     const updatedGoal = await Goal.findByIdAndUpdate(id, data, {
         new: true,
@@ -76,11 +76,11 @@ const deleteGoals = async(req, res) => {
 
     //Check for login user
     if (!req.user) {
-        throw new UnauthenicatedError("User Not Found");
+        throw new UnauthenticatedError("User Not Found");
     }
     //Make Sure the Logged in user Matches the Goal User
     if (goal.user.toString() !== req.user.id) {
-        throw new UnauthenicatedError("User Not Authorized");
+        throw new UnauthenticatedError("User Not Authorized");
     }
 
     const deletedGoal = await Goal.findByIdAndDelete(id);
